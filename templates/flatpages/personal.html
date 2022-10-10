@@ -1,0 +1,9 @@
+{% extends '../default.html' %}
+{% block title %}
+Personal Page
+{% endblock title %}
+
+{% block content %}
+<h1>Welcome to your personal page, {{request.user.username}}!</h1>
+<button> <a href="/accounts/logout/">Logout</a> </button>
+{% endblock content %}

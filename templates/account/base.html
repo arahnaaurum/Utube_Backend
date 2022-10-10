@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            {% load cache%}
+            {% cache 30 head_title %}
+                {% block head_title %}
+                {% endblock head_title %}
+            {% endcache %}
+        </title>
+    </head>
+    <body>
+        {% block body %}
+        {% block content %}
+        {% endblock content %}
+        {% endblock body %}
+        {% block extra_body %}
+        {% endblock extra_body %}
+    </body>
+</html>
