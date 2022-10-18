@@ -165,3 +165,16 @@ LOGIN_REDIRECT_URL = '/home/personal'
 
 LOGOUT_URL = '/accounts/logout/'
 LOGOUT_REDIRECT_URL = '/home'
+
+REST_FRAMEWORK = {
+   'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+   'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+   'PAGE_SIZE': 10,
+}
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_ALLOW_CREDENTIALS = True

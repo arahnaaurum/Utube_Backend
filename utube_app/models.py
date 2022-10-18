@@ -36,12 +36,13 @@ class Video(models.Model):
 
 class Comment(models.Model):
     author = models.ForeignKey("Author", on_delete=models.CASCADE)
+    time_creation = models.DateTimeField(auto_now_add=True)
     video = models.ForeignKey("Video", on_delete=models.CASCADE)
     text = models.TextField()
-    time_creation = models.DateTimeField(auto_now_add=True)
+
 
 
 class Like(models.Model):
-    video = models.ForeignKey("Video", on_delete=models.CASCADE)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     time_creation = models.DateTimeField(auto_now_add=True)
+    video = models.ForeignKey("Video", on_delete=models.CASCADE)
