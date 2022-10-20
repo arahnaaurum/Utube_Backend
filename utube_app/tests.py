@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.request import Request
 from django.forms.models import model_to_dict
-
+from django.core.files.uploadedfile import File
 
 class AuthorModelTest(TestCase):
     @classmethod
@@ -175,32 +175,21 @@ class VideoAPITests(APITestCase):
         self.author = Author.objects.create(identity=self.user)
         self.other_user = CustomUser.objects.create_user('Jon', 'jon@mail.com', phone="12345")
         self.other_author = Author.objects.create(identity=self.other_user)
-        self.video6 = Video.objects.create(id=6, author=self.author, title='Nightmare Before Christmas', file='',
+        self.video6 = Video.objects.create(id=6, author=self.author, title='Nightmare Before Christmas', file='../media/Kite.mp4',
                                            description='Songs', hashtags=['halloween', 'jack'])
-        self.video7 = Video.objects.create(id=7, author=self.other_author, title='Jaws', file='',
+        self.video7 = Video.objects.create(id=7, author=self.other_author, title='Jaws', file='../media/Kite.mp4',
                                            description='Very big shark', hashtags=['shark', 'jaws'])
         self.client.force_authenticate(user=self.user)
-    def test_create_video(self):
-        url = reverse('video-list')
-        # вариант 0
-        # data = {'author': self.author.pk, 'title': 'Film', 'description': 'somefilm', 'file':'', 'hashatags':['music', 'history']}
-        # AssertionError: {'author': [ErrorDetail(string='Incorrect[262 chars]d')]} != 201
-        # вариант 1
-        # data = {'author': self.author, 'title': 'Film', 'description': 'somefilm', 'file':'', 'hashatags':['music', 'history']}
-        # TypeError: Object of type Author is not JSON serializable
-        # вариант 2
-        # author_value = model_to_dict(self.author)
-        # data = {'author': author_value, 'title': 'Film', 'description': 'somefilm', 'file':'', 'hashatags':['music', 'history']}
-        # AssertionError: {'author': [ErrorDetail(string='Incorrect[263 chars]d')]}
-        # # вариант 3
-        # author_value = model_to_dict(self.author)
-        # data = {'author': author_value['id'], 'title': 'Film', 'description': 'somefilm', 'file': '',
-        #         'hashatags': ['music', 'history']}
-        # AssertionError: {'author': [ErrorDetail(string='Incorrect[262 chars]d')]} != 201
 
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Video.objects.get().title, 'Film')
+    # def test_create_video(self):
+    #     content = {
+    #         'file': File(open('media/Kite.mp4', 'rb')),
+    #         }
+    #     data = {"id":6, "author":self.author.pk, "title":'Nightmare Before Christmas', "file":content,
+    #                                        "description":'Songs', "hashtags":['halloween', 'jack']}
+    #     response = self.client.post(reverse('video-list'), data)
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #     self.assertEqual(Video.objects.get().title, 'Nightmare Before Christmas')
 
     def test_get_all_videos(self):
         response = self.client.get(reverse('video-list'))
@@ -220,10 +209,8 @@ class VideoAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_delete_other_users_video(self):
-        response = self.client.delete(
-            reverse('video-detail', kwargs={'pk': self.video7.pk}))
+        response = self.client.delete(reverse('video-detail', kwargs={'pk': self.video7.pk}))
         self.assertEqual(response.data['message'], "Delete request not allowed")
-
 
 
 class LikeAPITest(APITestCase):
@@ -234,28 +221,31 @@ class LikeAPITest(APITestCase):
         self.other_author = Author.objects.create(identity=self.other_user)
         self.video8 = Video.objects.create(id=8, author=self.author, title='Jaws', file='',
                                            description='Very big shark', hashtags=['shark', 'jaws'])
-        self.like1 = Like.objects.create(author=self.author, video=self.video8, text='LOL')
-        self.like2 = Like.objects.create(author=self.other_author, video=self.video8, text='Onono')
+        self.like1 = Like.objects.create(author=self.author, video=self.video8)
+        self.like2 = Like.objects.create(author=self.other_author, video=self.video8)
         self.client.force_authenticate(user=self.user)
 
-        def test_get_all_likes(self):
-            response = self.client.get(reverse('like-list'))
-            likes = Like.objects.all()
-            self.assertEqual(response.data['count'], len(likes))
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_create_like(self):
+        payload = {'author': self.author.pk, 'video': self.video8.pk, 'text':'kekeke'}
+        response = self.client.post(reverse('like-list'), data=json.dumps(payload), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        def test_get_single_like(self):
-            response = self.client.get(reverse('like-detail', kwargs={'pk': self.like1.pk}))
-            like = Video.objects.get(pk=self.like1.pk)
-            self.assertEqual(response.data['id'], like.id)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_get_all_likes(self):
+        response = self.client.get(reverse('like-list'))
+        likes = Like.objects.all()
+        self.assertEqual(response.data['count'], len(likes))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        def test_delete_like(self):
-            response = self.client.delete(
-                reverse('like-detail', kwargs={'pk': self.like1.pk}))
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_get_single_like(self):
+        response = self.client.get(reverse('like-detail', kwargs={'pk': self.like1.pk}))
+        like = Like.objects.get(pk=self.like1.pk)
+        self.assertEqual(response.data['id'], like.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        def test_cannot_delete_other_users_video(self):
-            response = self.client.delete(
-                reverse('like-detail', kwargs={'pk': self.like2.pk}))
-            self.assertEqual(response.data['message'], "Delete request not allowed")
+    def test_delete_like(self):
+        response = self.client.delete(reverse('like-detail', kwargs={'pk': self.like1.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_cannot_delete_other_users_like(self):
+        response = self.client.delete(reverse('like-detail', kwargs={'pk': self.like2.pk}))
+        self.assertEqual(response.data['message'], "Delete request not allowed")

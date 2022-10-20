@@ -27,8 +27,15 @@ class Video(models.Model):
     title = models.CharField(max_length=128)
     description = models.TextField(null=True)
     file = models.FileField()
+
     # хэштеги будут храниться в массиве, а не отдельным классом
-    hashtags = ArrayField(models.CharField(max_length=20, blank=True), size=10)
+    # дефолтные хэштеги нужны для упрощения тестирования
+    # def default_hashtags():
+    #     return 'movies, videos'.split(', ')
+    #
+    # hashtags = ArrayField(models.CharField(max_length=20, blank=True), size=10, default= default_hashtags)
+
+    hashtags = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f'{self.title}'

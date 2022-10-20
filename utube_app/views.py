@@ -4,13 +4,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
 from .models import *
 from .serializers import *
 from .search import search_video
 
-
 class HomeView(TemplateView):
     template_name = 'flatpages/home.html'
+
+    def get_context_data(self, **kwargs):
+       context = super(HomeView, self).get_context_data(**kwargs)
+       context['videos'] = Video.objects.all()
+       return context
 
 class PersonalView(LoginRequiredMixin, TemplateView):
     template_name = 'flatpages/personal.html'
@@ -74,9 +80,29 @@ class SubscriptionViewset(viewsets.ModelViewSet):
 
 # видео, лайки, комменты доступны для просмотра всем, для записи - только авторизованным юзерам
 class VideoViewset(viewsets.ModelViewSet):
+   # parser_classes = [JSONParser, FileUploadParser, MultiPartParser, FormParser,]
    queryset = Video.objects.all()
    serializer_class = VideoSerializer
    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+   # def create(self, request, *args, **kwargs):
+   #    author_data = Author.objects.get(id=request.data['author'])
+   #    title_data = request.data['title']
+   #    description_data = request.data['description']
+   #    hashtags_data = request.data['hashtags']
+   #    video_obj = request.data['file']
+   #
+   #    new_video = Video.objects.create(author=author_data,
+   #                                     title=title_data,
+   #                                     description=description_data,
+   #                                     file=video_obj,
+   #                                     hashtags=hashtags_data)
+   #    new_video.save()
+   #    serializer_context = {
+   #       'request': request,
+   #    }
+   #    serializer = VideoSerializer(new_video, context=serializer_context)
+   #    return Response(serializer.data)
 
    def get_queryset(self):
       queryset = Video.objects.all()

@@ -5,6 +5,16 @@ Home Page
 
 {% block content %}
 <h1>Welcome, guest!</h1>
+<!-- {% if videos %}-->
+<!--        {% for video in videos %}-->
+<!--        <h1>{{ video.description }}</h1>-->
+<!--        <video width="380" autoplay="autoplay" preload="auto"><source src="{{ video.file.url }}"></video>-->
+<!--        {% endfor %}-->
+<!--    {% else %}-->
+<!--    <p>No videos.</p>-->
+<!--    {% endif %}-->
+
+
 <button> <a href="/accounts/signup/">Register</a> </button>
 <button> <a href="/accounts/login/">Login</a> </button>
 <button> <a href="/accounts/logout/">Logout</a> </button>
