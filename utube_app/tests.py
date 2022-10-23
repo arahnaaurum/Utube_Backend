@@ -7,8 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.request import Request
-from django.forms.models import model_to_dict
-from django.core.files.uploadedfile import File
+from django.core.files.uploadedfile import File, SimpleUploadedFile
 
 class AuthorModelTest(TestCase):
     @classmethod
@@ -181,15 +180,15 @@ class VideoAPITests(APITestCase):
                                            description='Very big shark', hashtags=['shark', 'jaws'])
         self.client.force_authenticate(user=self.user)
 
-    # def test_create_video(self):
-    #     content = {
-    #         'file': File(open('media/Kite.mp4', 'rb')),
-    #         }
-    #     data = {"id":6, "author":self.author.pk, "title":'Nightmare Before Christmas', "file":content,
-    #                                        "description":'Songs', "hashtags":['halloween', 'jack']}
-    #     response = self.client.post(reverse('video-list'), data)
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(Video.objects.get().title, 'Nightmare Before Christmas')
+    def test_create_video(self):
+        filename = 'Kite.mp4'
+        file = File(open('media/Kite.mp4', 'rb'))
+        uploaded_file = SimpleUploadedFile(filename, file.read(),
+                                           content_type='multipart/form-data')
+        data = {"id":6, "author":self.author.pk, "title":'Nightmare Before Christmas', "file":uploaded_file,
+                                           "description":'Songs', "hashtags":'halloween'}
+        response = self.client.post(reverse('video-list'), data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_all_videos(self):
         response = self.client.get(reverse('video-list'))

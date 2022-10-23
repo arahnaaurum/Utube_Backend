@@ -12,16 +12,18 @@
     - Поиск по моделям: для поиска видео по описанию, хэшетгам и комментариям реализован отдельный метод search_video (см. файл search.py);
  6. Тесты: cтандартная библиотека unittest
     - В tests.py добавлены тесты для основных моделей (Author, Video, Comment);
-    - Также добавлены тесты для проверки корректной работы метода search_video.
+    - Добавлены тесты для проверки корректной работы метода search_video.
+    - Добавлены тесты API (для основных моделей, по которым будет вестись поиск, создание/удаление объектов - Video, Comment, Like);
+    - Подключены Github Actions для автоматического запуска тестов при их загрузке в репозиторий.
   7. API: Django RestAPI.
      Для реализации представлений использован класс ViewSet.
      Подключен Swagger: 127.0.0.1:8000/swagger-ui/
 
       API по уровню доступа (разрешений):
         - CustomUser (UserViewset) - только для администратора;
-        - Author (AuthorViewset), Subscription (SubscriptionViewset) - только для авторизованных пользователей;
-        - Video (VideoViewset), Comment(CommentViewset), Like (LikeViewset) - методы GET и HEAD для всех пользователей,
-          остальные методы - только для авторизованных пользователей;
+        - Subscription (SubscriptionViewset) - только для авторизованных пользователей;
+        - Author (AuthorViewset), Video (VideoViewset), Comment(CommentViewset), Like (LikeViewset) - методы GET и HEAD
+          для всех пользователей, остальные методы - только для авторизованных пользователей;
 
       API - запросы по моделям:
       - CustomUser:
@@ -31,10 +33,11 @@
       - Author:
             url: 127.0.0.1:8000/api/author/[id]/
             методы:
-                GET,
+                GET - при передаче параметра user_id (localhost/api/video/?user_id=int) осуществляется поиск профиля
+                автора по юзеру
                 POST - юзер может создать только одного автора от своего имени (переопределен метод create())
                 DELETE - юзер может удалить только своего автора (переопределен метод destroy())
-                PUT/PATCH - запрещен (переопределен метод update())
+                PUT/PATCH - переопределен метод update(), можно менять только "своего" автора
       - Subscription:
             url: 127.0.0.1:8000/api/subscription/[id]/
             методы:
@@ -45,7 +48,7 @@
             url: 127.0.0.1:8000/api/video/[id]/
             методы:
                 GET - при передаче параметра query (localhost/api/video/?query=string) осуществляется поиск видео
-                по описанию, хэштегам, комментариям при помощи подключенного метода search_video() (см. search.py);
+                по описанию, хэштегам, комментариям при помощи подключенного метода search_video() (см. search.py)
                 GET - при передаче параметра author_id (localhost/api/video/?author_id=int) осуществляется поиск видео
                 по автору
                 POST

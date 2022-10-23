@@ -31,13 +31,23 @@ INSTALLED_APPS = [
     'rest_framework',
     'fpages',
     'utube_app',
+
+    # Websocket чаты
+    'channels',
+    'chat',
+    'privatechat',
+
     # настройки allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
+
+    'corsheaders',
 ]
+
+CORS_ORIGIN_WHITELIST = ( 'localhost:8000', )
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,7 +79,14 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Utube.wsgi.application'
+ASGI_APPLICATION = 'Utube.routing.application'
+# WSGI_APPLICATION = 'Utube.wsgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database

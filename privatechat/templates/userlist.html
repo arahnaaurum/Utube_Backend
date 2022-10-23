@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Starting page
+{% endblock head_title %}
+
+{% block content %}
+    <main>
+            <div class="userlist_container">
+                <button id="btn_users">SHOW ALL USERS</button>
+                <div id="userlist_container"> </div>
+            <button id="btn_toggle">Hide/show userlist</button></div>
+    </main>
+
+
+    <script>
+            const container = document.querySelector('#userlist_container');
+            const btn = document.querySelector('#btn_users');
+            const toggle = document.querySelector('#btn_toggle');
+
+            async function getAuthorList(url) {
+               let response = await fetch(url,  {
+                    method: "GET",
+                    mode: "no-cors",
+                });
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+            };
+
+            btn.addEventListener('click', async () => {
+                const reqResult = await getAuthorList('http://127.0.0.1:8000/api/author/');
+
+                reqResult['results'].forEach(element => {
+                    let user_id = element.identity
+                    let pic = element.profile_pic
+
+                    container.innerHTML += `<div class="user_info">
+                    <a class="username" href="http://127.0.0.1:8000/private/${user_id}">
+                        <img class="profile-pic" src="${pic}" >
+                    </a>
+                    </div>`
+                    });
+
+                toggle.style.display = "block";
+            });
+
+            toggle.addEventListener('click', () => {
+                if (container.style.display === "none") {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            })
+
+    </script>
+{% endblock content %}

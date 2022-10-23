@@ -28,11 +28,17 @@ class UserViewset(viewsets.ModelViewSet):
    permission_classes = [permissions.IsAdminUser]
 
 
-# создание авторского аккаунта и подписка д.б. доступна только зарегистрированным и авторизованным пользователям
 class AuthorViewset(viewsets.ModelViewSet):
    queryset = Author.objects.all()
    serializer_class = AuthorSerializer
-   permission_classes = [permissions.IsAuthenticated]
+   # permission_classes = [permissions.IsAuthenticated]
+
+   def get_queryset(self):
+      queryset = Author.objects.all()
+      user_id = self.request.query_params.get('user_id', None)
+      if user_id is not None:
+         queryset = Author.objects.filter(identity=user_id)
+      return queryset
 
    def create(self, request, *args, **kwargs):
       author_data = request.data
@@ -46,7 +52,18 @@ class AuthorViewset(viewsets.ModelViewSet):
       return Response(serializer.data)
 
    def update(self, request, *args, **kwargs):
-      return Response({"message": "Update request not allowed"})
+      author = self.get_object()
+      logged_user = request.user
+      if (logged_user == author.identity):
+         partial = kwargs.pop('partial', True)
+         instance = self.get_object()
+         serializer = self.get_serializer(instance, data=request.data, partial=partial)
+         serializer.is_valid(raise_exception=True)
+         self.perform_update(serializer)
+         return Response(serializer.data)
+      else:
+         response_message = {"message": "Delete request not allowed"}
+         return Response(response_message)
 
    def destroy(self, request, *args, **kwargs):
       author = self.get_object()
@@ -78,7 +95,6 @@ class SubscriptionViewset(viewsets.ModelViewSet):
       return Response(response_message)
 
 
-# видео, лайки, комменты доступны для просмотра всем, для записи - только авторизованным юзерам
 class VideoViewset(viewsets.ModelViewSet):
    # parser_classes = [JSONParser, FileUploadParser, MultiPartParser, FormParser,]
    queryset = Video.objects.all()

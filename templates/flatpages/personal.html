@@ -5,5 +5,16 @@ Personal Page
 
 {% block content %}
 <h1>Welcome to your personal page, {{request.user.username}}!</h1>
+    {% if request.user.author.profile_pic.url != '' %}
+    <img class="profile-pic" src="{{request.user.author.profile_pic.url}}" >
+    {% else %}
+    <p>Choose your profile picture!</p>
+    {% endif %}
+<!--<form method="POST" action="" enctype="multipart/form-data">-->
+<!--	{% csrf_token %}-->
+<!--	{{form.as_p}}-->
+<!--    	<input class="btn btn-primary" type="submit" name="Update Information">-->
+<!--</form>-->
+
 <button> <a href="/accounts/logout/">Logout</a> </button>
 {% endblock content %}

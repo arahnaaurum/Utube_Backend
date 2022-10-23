@@ -11,6 +11,7 @@ class Author(models.Model):
     identity = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     is_banned = models.BooleanField(default=False)
     subscribed_to = models.ManyToManyField("Author", through="Subscription")
+    profile_pic = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.identity.username}'
@@ -29,7 +30,6 @@ class Video(models.Model):
     file = models.FileField()
 
     # хэштеги будут храниться в массиве, а не отдельным классом
-    # дефолтные хэштеги нужны для упрощения тестирования
     # def default_hashtags():
     #     return 'movies, videos'.split(', ')
     #

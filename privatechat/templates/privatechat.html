@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Starting page
+{% endblock head_title %}
+
+{% block content %}
+    <main>
+        <h3 class="chat_greet">You, {{request.user.username}}, are now talking to {{user.username}}:</h3>
+           
+            <div class="total_container">
+                <div class="userlist_container">
+                    <button id="btn_users">SHOW ALL USERS</button>
+                    <div id="userlist_container"> </div>
+                    <button id="btn_toggle">Hide/show userlist</button></div>
+                <div class="textarea"></div>
+            </div>
+            <div>
+                <input class="msginput" id="input" type="text" size="80"> </br>
+                <input class="btn_chat" id="submit" type="button" value="SEND">
+            </div>
+    </main>
+
+
+    {{user.id|json_script:"json-username"}}
+    {{request.user.username|json_script:"json-message-username"}}
+    <script>
+            const container = document.querySelector('#userlist_container');
+            const btn = document.querySelector('#btn_users');
+            const toggle = document.querySelector('#btn_toggle');
+
+            async function getAuthorList(url) {
+               let response = await fetch(url,  {
+                    method: "GET",
+                    mode: "no-cors",
+                });
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+            };
+
+            btn.addEventListener('click', async () => {
+                const reqResult = await getAuthorList('http://127.0.0.1:8000/api/author/');
+
+                reqResult['results'].forEach(element => {
+                    let user_id = element.identity
+                    let pic = element.profile_pic
+
+                    container.innerHTML += `<div class="user_info">
+                    <a class="username" href="http://127.0.0.1:8000/private/${user_id}">
+                        <img class="profile-pic" src="${pic}" >
+                    </a>
+                    </div>`
+                    });
+
+                toggle.style.display = "block";
+            });
+
+            toggle.addEventListener('click', () => {
+                if (container.style.display === "none") {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            })
+
+
+    const id = JSON.parse(document.getElementById('json-username').textContent);
+    const sender_username = JSON.parse(document.getElementById('json-message-username').textContent);
+
+
+    document.querySelector('#submit').onclick = function (e) {
+            const messageInputDom = document.querySelector('#input');
+            const message = messageInputDom.value;
+            socket.send(JSON.stringify({
+                'message': message,
+                'username': sender_username,
+            }));
+            messageInputDom.value = '';
+        };
+
+    const socket = new WebSocket (
+        'ws://' +
+        window.location.host +
+        '/ws/private/' +
+        + id
+        + '/'
+    );
+
+    socket.onopen = function(e) {
+        console.log('Connected');
+    }
+
+    socket.onclose = function(e) {
+        console.log('Disconnected');
+    }
+
+    socket.onerror = function(e) {
+        console.log(e);
+    }
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('.textarea').innerText += (data.username + ': ' + data.message + '\n')
+    }
+
+
+    </script>
+{% endblock content %}

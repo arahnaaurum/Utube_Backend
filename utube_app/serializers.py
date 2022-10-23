@@ -11,7 +11,7 @@ class AuthorSerializer(serializers.ModelSerializer):
     subscribed_to = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
        model = Author
-       fields = ['id', 'identity', 'is_banned', 'subscribed_to']
+       fields = ['id', 'identity', 'profile_pic', 'is_banned', 'subscribed_to']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
