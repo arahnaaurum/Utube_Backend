@@ -35,7 +35,7 @@ urlpatterns = [
     path('home/', include('utube_app.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/', include(router.urls)),
-    path('chat/', include('chat.urls')),
+    path('public/', include('publicchat.urls')),
     path('private/', include('privatechat.urls')),
     re_path('swagger-ui/',
         TemplateView.as_view(

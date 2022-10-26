@@ -17,96 +17,183 @@ Starting page
                 <div class="textarea"></div>
             </div>
             <div>
-                <input class="msginput" id="input" type="text" size="80"> </br>
+                <input class="msginput" id="input" type="text" size="80"> <br>
                 <input class="btn_chat" id="submit" type="button" value="SEND">
             </div>
     </main>
 
 
-    {{user.id|json_script:"json-username"}}
-    {{request.user.username|json_script:"json-message-username"}}
-    <script>
-            const container = document.querySelector('#userlist_container');
-            const btn = document.querySelector('#btn_users');
-            const toggle = document.querySelector('#btn_toggle');
+<!-- фронтэнд -->
+{{user.id|json_script:"json-recepient-id"}}
+{{user.username|json_script:"json-recipient-username"}}
+{{request.user.id|json_script:"json-author-id"}}
+{{request.user.username|json_script:"json-author-username"}}
+<script>
 
-            async function getAuthorList(url) {
-               let response = await fetch(url,  {
-                    method: "GET",
-                    mode: "no-cors",
-                });
-               if (response.ok) {
-                    let result = await response.json();
-                    return result
-               } else {
-                    alert("Ошибка HTTP: " + response.status);
-               }
-            };
+const recepientId = JSON.parse(document.getElementById('json-recepient-id').textContent);
+const recepientUsername = JSON.parse(document.getElementById('json-recipient-username').textContent);
+const authorId = JSON.parse(document.getElementById('json-author-id').textContent);
+const authorUsername = JSON.parse(document.getElementById('json-author-username').textContent);
 
-            btn.addEventListener('click', async () => {
-                const reqResult = await getAuthorList('http://127.0.0.1:8000/api/author/');
+async function getListByApi(url) {
+    let response = await fetch(url, {
+        method: "GET",
+        mode: "no-cors",
+    });
+    if (response.ok) {
+        let result = await response.json();
+        return result
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+};
 
-                reqResult['results'].forEach(element => {
-                    let user_id = element.identity
-                    let pic = element.profile_pic
+let chatId;
+(authorId > recepientId) ? chatId = Number(String(authorId) + String(recepientId)) : chatId = Number(String(recepientId) + String(authorId));
 
-                    container.innerHTML += `<div class="user_info">
+document.addEventListener("DOMContentLoaded", async () => {
+    const reqResult = await getListByApi(`http://127.0.0.1:8000/private/api/msglist/?chat=${chatId}`);
+    reqResult['results'].forEach(element => {
+        let sender = '';
+        if (element.author == authorId) {
+            sender = authorUsername;
+        } else {
+            sender = recepientUsername;
+        }
+        document.querySelector('.textarea').innerText += (sender + ': ' + element.text + '\n')
+    });
+});
+
+async function sendMessage(url, chatId, authorId, recepientId, text) {
+    let response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFTOKEN": "{{csrf_token}}"
+        },
+        body: JSON.stringify({ chatId: chatId, author: authorId, recepient: recepientId, text: text })
+
+    });
+    if (response.ok) {
+        let result = await response.json();
+        return result
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+};
+
+async function getPreviousMessage(url) {
+    let response = await fetch(url, {
+        method: "GET",
+        mode: "no-cors",
+    });
+    if (response.ok) {
+        let result = await response.json();
+        return result
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+};
+
+async function patchPreviousMessage(url) {
+    let isRead = true;
+    let response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFTOKEN": "{{csrf_token}}"
+        },
+        body: JSON.stringify({ isRead: isRead })
+    });
+
+    if (response.ok) {
+        let result = await response.json();
+        return result
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+};
+
+document.querySelector('#submit').onclick = async function (e) {
+    const messageInputDom = document.querySelector('#input');
+    const message = messageInputDom.value;
+    socket.send(JSON.stringify({
+        'message': message,
+        'username': authorUsername,
+    }));
+    messageInputDom.value = '';
+
+    let previousMessageList = await getPreviousMessage(`http://127.0.0.1:8000/private/api/msglist/?chat=${chatId}`)
+    let previousMessage = (previousMessageList['results'].slice(-1))[0]
+    if (previousMessage) {
+        console.log(previousMessage);
+        console.log(previousMessage.author);
+        console.log(previousMessage.id);
+        if (previousMessage.author != authorId) {
+            await patchPreviousMessage(`http://127.0.0.1:8000/private/api/msglist/${previousMessage.id}/`)
+        }
+    }
+
+
+    await sendMessage("http://127.0.0.1:8000/private/api/msglist/", chatId, authorId, recepientId, message)
+};
+
+
+const container = document.querySelector('#userlist_container');
+const btn = document.querySelector('#btn_users');
+const toggle = document.querySelector('#btn_toggle');
+
+btn.addEventListener('click', async () => {
+    const reqResult = await getListByApi('http://127.0.0.1:8000/api/author/');
+
+    reqResult['results'].forEach(element => {
+        let user_id = element.identity
+        let pic = element.profile_pic
+
+        container.innerHTML += `<div class="user_info">
                     <a class="username" href="http://127.0.0.1:8000/private/${user_id}">
                         <img class="profile-pic" src="${pic}" >
                     </a>
                     </div>`
-                    });
+    });
 
-                toggle.style.display = "block";
-            });
+    toggle.style.display = "block";
+});
 
-            toggle.addEventListener('click', () => {
-                if (container.style.display === "none") {
-                    container.style.display = "block";
-                } else {
-                    container.style.display = "none";
-                }
-            })
-
-
-    const id = JSON.parse(document.getElementById('json-username').textContent);
-    const sender_username = JSON.parse(document.getElementById('json-message-username').textContent);
-
-
-    document.querySelector('#submit').onclick = function (e) {
-            const messageInputDom = document.querySelector('#input');
-            const message = messageInputDom.value;
-            socket.send(JSON.stringify({
-                'message': message,
-                'username': sender_username,
-            }));
-            messageInputDom.value = '';
-        };
-
-    const socket = new WebSocket (
-        'ws://' +
-        window.location.host +
-        '/ws/private/' +
-        + id
-        + '/'
-    );
-
-    socket.onopen = function(e) {
-        console.log('Connected');
+toggle.addEventListener('click', () => {
+    if (container.style.display === "none") {
+        container.style.display = "block";
+    } else {
+        container.style.display = "none";
     }
+})
 
-    socket.onclose = function(e) {
-        console.log('Disconnected');
-    }
+// WebSocket
+const socket = new WebSocket(
+    'ws://' +
+    window.location.host +
+    '/ws/private/' +
+    + recepientId
+    + '/'
+);
 
-    socket.onerror = function(e) {
-        console.log(e);
-    }
+socket.onopen = function (e) {
+    console.log('Connected');
+}
 
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        document.querySelector('.textarea').innerText += (data.username + ': ' + data.message + '\n')
-    }
+socket.onclose = function (e) {
+    console.log('Disconnected');
+}
+
+socket.onerror = function (e) {
+    console.log(e);
+}
+
+socket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    document.querySelector('.textarea').innerText += (data.username + ': ' + data.message + '\n')
+}
+
 
 
     </script>

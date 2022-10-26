@@ -31,7 +31,6 @@ class UserViewset(viewsets.ModelViewSet):
 class AuthorViewset(viewsets.ModelViewSet):
    queryset = Author.objects.all()
    serializer_class = AuthorSerializer
-   # permission_classes = [permissions.IsAuthenticated]
 
    def get_queryset(self):
       queryset = Author.objects.all()

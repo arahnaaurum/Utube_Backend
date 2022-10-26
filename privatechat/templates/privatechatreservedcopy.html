@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Starting page
+{% endblock head_title %}
+
+{% block content %}
+    <main>
+        <h3 class="chat_greet">You, {{request.user.username}}, are now talking to {{user.username}}:</h3>
+           
+            <div class="total_container">
+                <div class="userlist_container">
+                    <button id="btn_users">SHOW ALL USERS</button>
+                    <div id="userlist_container"> </div>
+                    <button id="btn_toggle">Hide/show userlist</button></div>
+                <div class="textarea"></div>
+            </div>
+            <div>
+                <input class="msginput" id="input" type="text" size="80"> <br>
+                <input class="btn_chat" id="submit" type="button" value="SEND">
+            </div>
+    </main>
+
+
+<!--    выводим предыдущие сообщения-->
+    {{user.id|json_script:"json-recepient-id"}}
+    {{user.username|json_script:"json-recipient-username"}}
+    {{request.user.id|json_script:"json-author-id"}}
+    {{request.user.username|json_script:"json-author-username"}}
+    <script>
+         const recepientId = JSON.parse(document.getElementById('json-recepient-id').textContent);
+         const recepientUsername = JSON.parse(document.getElementById('json-recipient-username').textContent);
+         const authorId = JSON.parse(document.getElementById('json-author-id').textContent);
+         const authorUsername = JSON.parse(document.getElementById('json-author-username').textContent);
+
+         async function getMessageList(url) {
+               let response = await fetch(url,  {
+                    method: "GET",
+                    mode: "no-cors",
+                });
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+            };
+
+         let chatId;
+         (authorId > recepientId)? chatId = Number(String(authorId) + String(recepientId)) : chatId = Number(String(recepientId) + String(authorId));
+
+         document.addEventListener("DOMContentLoaded", async () => {
+            const reqResult = await getMessageList(`http://127.0.0.1:8000/private/api/msglist/?chat=${chatId}`);
+            reqResult['results'].forEach(element => {
+                   let sender = '';
+                   if (element.author = authorId) {
+                        sender = authorUsername;
+                   } else {
+                        sender = recepientUsername;
+                   }
+                   document.querySelector('.textarea').innerText += (sender + ': ' + element.text + '\n')
+                });
+         });
+    </script>
+
+
+<!--    текущий чат-->
+    {{user.id|json_script:"json-userid"}}
+    {{request.user.id|json_script:"json-author-id"}}
+    {{request.user.username|json_script:"json-author-username"}}
+    <script>
+        const container = document.querySelector('#userlist_container');
+        const btn = document.querySelector('#btn_users');
+        const toggle = document.querySelector('#btn_toggle');
+
+        async function getAuthorList(url) {
+               let response = await fetch(url,  {
+                    method: "GET",
+                    mode: "no-cors",
+                });
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+        };
+
+        btn.addEventListener('click', async () => {
+            const reqResult = await getAuthorList('http://127.0.0.1:8000/api/author/');
+
+            reqResult['results'].forEach(element => {
+                    let user_id = element.identity
+                    let pic = element.profile_pic
+
+                    container.innerHTML += `<div class="user_info">
+                    <a class="username" href="http://127.0.0.1:8000/private/${user_id}">
+                        <img class="profile-pic" src="${pic}" >
+                    </a>
+                    </div>`
+            });
+
+            toggle.style.display = "block";
+        });
+
+        toggle.addEventListener('click', () => {
+            if (container.style.display === "none") {
+                    container.style.display = "block";
+            } else {
+                    container.style.display = "none";
+            }
+        })
+
+        async function sendMessage(url, chatId, author, recepient, text) {
+                let response = await fetch(url,  {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFTOKEN": "{{csrf_token}}"
+                    },
+                    body: JSON.stringify({chatId : chatId, author : author, recepient : recepient, text : text})
+
+                });
+                if (response.ok) {
+                    let result = await response.json();
+                    return result
+                } else {
+                    alert("Ошибка HTTP: " + response.status);
+                }
+        };
+
+        async function getPreviousMessage(url) {
+               let response = await fetch(url,  {
+                    method: "GET",
+                    mode: "no-cors",
+                });
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+        };
+
+        async function patchPreviousMessage(url) {
+               let isRead = true;
+               let response = await fetch(url,  {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFTOKEN": "{{csrf_token}}"
+                    },
+                    body: JSON.stringify({isRead : isRead})
+                });
+
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+        };
+
+    const id = JSON.parse(document.getElementById('json-userid').textContent);
+    const author_id = JSON.parse(document.getElementById('json-author-id').textContent);
+    const author_username = JSON.parse(document.getElementById('json-author-username').textContent);
+
+
+    document.querySelector('#submit').onclick = async function (e) {
+            const messageInputDom = document.querySelector('#input');
+            const message = messageInputDom.value;
+            socket.send(JSON.stringify({
+                'message': message,
+                'username': author_username,
+            }));
+            messageInputDom.value = '';
+
+            let chat_id;
+            author_id>id? chat_id = Number(String(author_id) + String(id)) : chat_id = Number(String(id) + String(author_id))
+
+            await sendMessage("http://127.0.0.1:8000/private/api/msglist/", chat_id, author_id, id, message)
+
+            let previousMessageList = await getPreviousMessage(`http://127.0.0.1:8000/private/api/msglist/?chat=${chat_id}`)
+            let previousMessage = (previousMessageList['results'].slice(-1))[0]
+            console.log(previousMessage);
+            console.log(previousMessage.author);
+            console.log(previousMessage.id);
+
+<!--            if (previousMessage.author != author_id) {-->
+<!--                await patchPreviousMessage(`http://127.0.0.1:8000/private/api/msglist/${previousMessage.id}/`)-->
+<!--            }-->
+
+
+        };
+
+    const socket = new WebSocket (
+        'ws://' +
+        window.location.host +
+        '/ws/private/' +
+        + id
+        + '/'
+    );
+
+    socket.onopen = function(e) {
+        console.log('Connected');
+    }
+
+    socket.onclose = function(e) {
+        console.log('Disconnected');
+    }
+
+    socket.onerror = function(e) {
+        console.log(e);
+    }
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('.textarea').innerText += (data.username + ': ' + data.message + '\n')
+    }
+
+
+    </script>
+{% endblock content %}
