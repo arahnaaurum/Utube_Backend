@@ -28,6 +28,6 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
       - name: Run Tests
-        run: python manage.py test
+        run: python manage.py test utube_app.tests
         env:
           DBURL: postgres://postgres:postgres@localhost:5432/postgres
