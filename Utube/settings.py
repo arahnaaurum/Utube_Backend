@@ -159,7 +159,7 @@ DEFAULT_FROM_EMAIL = 'arahna.aurum@yandex.ru'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'arahna.aurum'
-EMAIL_HOST_PASSWORD = 'WBzFuM6eiSgmQdj'
+EMAIL_HOST_PASSWORD = '***'
 EMAIL_USE_SSL = True
 
 # кастомизированный юзер
