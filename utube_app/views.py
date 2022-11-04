@@ -1,6 +1,10 @@
+import os
+from twilio.rest import Client
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -9,6 +13,10 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from .models import *
 from .serializers import *
 from .search import search_video
+from .forms import *
+
+from webpush import send_user_notification
+
 
 class HomeView(TemplateView):
     template_name = 'flatpages/home.html'
@@ -18,8 +26,55 @@ class HomeView(TemplateView):
        context['videos'] = Video.objects.all()
        return context
 
-class PersonalView(LoginRequiredMixin, TemplateView):
-    template_name = 'flatpages/personal.html'
+
+@login_required(login_url='/account/login/')
+def personalView(request):
+   sms_form = SMSForm()
+   if request.method == 'POST':
+      sms_form = SMSForm(request.POST)
+      # if sms_form.is_valid():
+      #    sms_code = form.cleaned_data['SMS_code']
+      #    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+      #    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+      #    client = Client(account_sid, auth_token)
+      #
+      #    заменить 'VAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'на VERIFICATION_SID
+      #
+      #    verification_check = client.verify \
+      #       .v2 \
+      #       .services('VAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+      #       .verification_checks \
+      #       .create(to='+15017122661', code=f'{sms_code}')
+      #
+      #    if verification_check.status == "approved":
+      #       user = CustomUser.objects.get(id=request.user.id)
+      #       user.phone_verified = True
+      #       user.save()
+      #       return HttpResponseRedirect('/')
+
+   try:
+      author = Author.objects.get(identity=request.user.id)
+   except:
+      form = CreateAuthorForm()
+      if request.method == 'POST':
+         form = CreateAuthorForm(request.POST, request.FILES)
+         if form.is_valid():
+            profile_pic = form.cleaned_data['profile_pic']
+            new_author = Author.objects.create(identity=request.user, profile_pic=profile_pic)
+            new_author.save()
+   else:
+      form = AuthorForm(instance=author)
+      if request.method == 'POST':
+         form = AuthorForm(request.POST, request.FILES, instance=author)
+         if form.is_valid():
+            form.save()
+
+   context = {'form':form, 'smsform':sms_form}
+   return render(request, 'flatpages/personal.html', context)
+
+# class PersonalView(LoginRequiredMixin, TemplateView):
+#     template_name = 'flatpages/personal.html'
+#     payload = {"head": "Welcome!", "body": "Hello World"}
 
 # информация о юзерах доступна только админу
 class UserViewset(viewsets.ModelViewSet):

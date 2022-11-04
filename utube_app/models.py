@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 class CustomUser(AbstractUser):
     # кастомизированной модели юзера добавлено поле с номером телефона, запрашиваемое при регистрации
     phone = models.CharField(max_length=200, blank=True, null=True)
+    phone_verified = models.BooleanField(default=False, null=True)
 
 # чтобы не избежать путаницы с моделью User, стандартный пользователь будет обозначен как "автор"
 class Author(models.Model):

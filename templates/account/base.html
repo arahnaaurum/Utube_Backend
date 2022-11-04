@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
+{% load webpush_notifications %}
     <head>
+        {% webpush_header %}
+
+         <meta name="vapid-key" content="{{ vapid_key }}">
+    {% if user.id %}
+        <meta name="user_id" content="{{ user.id }}">
+    {% endif %}
         <title>
-            {% load cache%}
-            {% cache 30 head_title %}
-                {% block head_title %}
-                {% endblock head_title %}
-            {% endcache %}
+            {% block head_title %}
+            {% endblock head_title %}
         </title>
     </head>
     <body>

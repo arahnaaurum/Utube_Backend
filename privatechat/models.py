@@ -1,5 +1,4 @@
 from django.db import models
-from utube_app.models import Author
 
 class PrivateMessage(models.Model):
     chatId = models.IntegerField(default=0)

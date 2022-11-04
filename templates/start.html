@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="vapid-key" content="{{ vapid_key }}">
+    {% if user.id %}
+        <meta name="user_id" content="{{ user.id }}">
+    {% endif %}
+    <title>Web Push</title>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet">
+</head>
+
+<body>
+<li class="nav-item"><a class="nav-link active" aria-current="page" href="/home/personal/">Personal page</a></li>
+<div>
+    <h2>Registartion and sign in</h2>
+    <button> <a href="/accounts/signup/">Register</a> </button>
+    <button> <a href="/accounts/login/">Login</a> </button>
+    <button> <a href="/accounts/logout/">Logout</a> </button>
+
+    <h2>Chats</h2>
+    <button> <a href="http://127.0.0.1:8000/public/">Public chats</a> </button>
+    <button> <a href="http://127.0.0.1:8000/private/">Private chats</a> </button>
+
+    <h3>Api</h3>
+    <button> <a href="http://127.0.0.1:8000/api/">API</a> </button>
+</div>
+
+<div>
+    <form id="send-push__form">
+        <h3 class="header">Send a push notification</h3>
+        <p class="error"></p>
+        <input type="text" name="head" placeholder="Header goes here">
+        <textarea name="body" id="" cols="30" rows="10" placeholder="Body goes here"></textarea>
+        <button>Send Me</button>
+    </form>
+
+    <script src="{% static '/js/registerSw.js' %}"></script>
+    <script src="{% static '/js/site.js' %}"></script>
+</div>
+
+</body>
+</html>

@@ -31,11 +31,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'fpages',
-    'utube_app',
+    'utube_app.apps.UtubeAppConfig',
+    'django_apscheduler',
+    'webpush',
 
     # Websocket чаты
     'publicchat',
-    'privatechat',
+    'privatechat.apps.PrivatechatConfig',
 
     # настройки allauth
     'allauth',
@@ -157,7 +159,7 @@ DEFAULT_FROM_EMAIL = 'arahna.aurum@yandex.ru'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'arahna.aurum'
-EMAIL_HOST_PASSWORD = '******'
+EMAIL_HOST_PASSWORD = 'WBzFuM6eiSgmQdj'
 EMAIL_USE_SSL = True
 
 # кастомизированный юзер
@@ -201,3 +203,13 @@ CORS_ORIGIN_WHITELIST = [
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
 ]
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+# если задача не выполняется за 25 секунд, то она автоматически снимается
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
+WEBPUSH_SETTINGS = {
+   "VAPID_PUBLIC_KEY": "BJ3BrV957SOpjhBRm1grKqWkmy_-eJs7SBjMbWIqy9bjv4BjcvP8bWSeNNia3agoZMbYpAFHHTUTwAzn7gxl2ls",
+   "VAPID_PRIVATE_KEY": "tpZFc7aPJ8hrbh_h0S_fI_VZB7loEfiW9WCs0MoTAeU",
+   "VAPID_ADMIN_EMAIL": "arahna.aurum@yandex.ru"
+}
