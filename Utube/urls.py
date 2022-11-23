@@ -17,6 +17,7 @@ router.register(r'subscription', views.SubscriptionViewset)
 router.register(r'video', views.VideoViewset)
 router.register(r'comment', views.CommentViewset)
 router.register(r'like', views.LikeViewset)
+router.register(r'current', views.CurrentViewset)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -37,7 +38,7 @@ urlpatterns = [
     path('push/', send_push),
     path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/x-javascript')),
     path('admin/', admin.site.urls),
-    path('home/', include('utube_app.urls')),
+    path('personal/', include('utube_app.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/', include(router.urls)),
     path('public/', include('publicchat.urls')),

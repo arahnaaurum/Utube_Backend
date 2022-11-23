@@ -179,12 +179,13 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none' #'mandatory'
 ACCOUNT_FORMS = {'signup': 'utube_app.forms.MyCustomSocialSignupForm'}
+ACCOUNT_SIGNUP_REDIRECT_URL = "/"
 
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/home/personal'
+LOGIN_REDIRECT_URL = '/personal'
 
 LOGOUT_URL = '/accounts/logout/'
-LOGOUT_REDIRECT_URL = '/home'
+LOGOUT_REDIRECT_URL = 'http://127.0.0.1:3000/'
 
 REST_FRAMEWORK = {
    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
@@ -192,16 +193,18 @@ REST_FRAMEWORK = {
    'PAGE_SIZE': 100,
 }
 
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
+    'http://localhost:3000',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
+    'http://localhost:3000',
 ]
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"

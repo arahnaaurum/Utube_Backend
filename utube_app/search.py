@@ -1,4 +1,4 @@
-from .models import Video, Comment, CustomUser, Author
+from .models import Video, Comment, CustomUser, Author, Subscription
 from itertools import chain
 
 def search_video(value):
@@ -20,4 +20,14 @@ def search_video(value):
     # выполняем сортировку по дате создания (от старому к новому)
     final_set.sort(key=lambda x: x.time_creation, reverse=False)
 
+    return final_set
+
+def search_video_by_subscription(subscriber_id):
+    query_set = []
+    subscriptions = Subscription.objects.filter(subscriber=subscriber_id)
+    for subscription in subscriptions:
+        query_set.append(Video.objects.filter(author = subscription.author.id))
+    nonunique_set = list(chain(*query_set))
+    unique_set = set(nonunique_set)
+    final_set = list(unique_set)
     return final_set

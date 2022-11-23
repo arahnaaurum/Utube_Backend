@@ -7,31 +7,27 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from rest_framework import permissions
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
+
 from rest_framework.response import Response
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
+
 from .models import *
 from .serializers import *
-from .search import search_video
+from .search import search_video, search_video_by_subscription
 from .forms import *
+from rest_framework.decorators import api_view
 
 from webpush import send_user_notification
 
-
-class HomeView(TemplateView):
-    template_name = 'flatpages/home.html'
-
-    def get_context_data(self, **kwargs):
-       context = super(HomeView, self).get_context_data(**kwargs)
-       context['videos'] = Video.objects.all()
-       return context
-
-
-@login_required(login_url='/account/login/')
+@login_required(login_url='/accounts/login/')
 def personalView(request):
    sms_form = SMSForm()
-   if request.method == 'POST':
-      sms_form = SMSForm(request.POST)
+   # if request.method == 'POST':
+   #    sms_form = SMSForm(request.POST)
       # if sms_form.is_valid():
       #    sms_code = form.cleaned_data['SMS_code']
       #    account_sid = os.environ['TWILIO_ACCOUNT_SID']
@@ -70,11 +66,8 @@ def personalView(request):
             form.save()
 
    context = {'form':form, 'smsform':sms_form}
-   return render(request, 'flatpages/personal.html', context)
+   return render(request, 'account/personal.html', context)
 
-# class PersonalView(LoginRequiredMixin, TemplateView):
-#     template_name = 'flatpages/personal.html'
-#     payload = {"head": "Welcome!", "body": "Hello World"}
 
 # информация о юзерах доступна только админу
 class UserViewset(viewsets.ModelViewSet):
@@ -133,27 +126,38 @@ class AuthorViewset(viewsets.ModelViewSet):
 class SubscriptionViewset(viewsets.ModelViewSet):
    queryset = Subscription.objects.all()
    serializer_class = SubscriptionSerializer
-   permission_classes = [permissions.IsAuthenticated]
+   # permission_classes = [permissions.IsAuthenticated]
+
+   def get_queryset(self):
+      queryset = Subscription.objects.all()
+      subscriber = self.request.query_params.get('subscriber', None)
+      author = self.request.query_params.get('author', None)
+      if subscriber is not None:
+         if author is not None:
+            queryset = Subscription.objects.filter(subscriber=subscriber, author=author)
+         else:
+            queryset = Subscription.objects.filter(subscriber=subscriber)
+      return queryset
 
    def update(self, request, *args, **kwargs):
       return Response({"message": "Update request not allowed"})
 
-   def destroy(self, request, *args, **kwargs):
-      subscription = self.get_object()
-      logged_user = request.user
-      if (logged_user == subscription.subscriber.identity):
-         subscription.delete()
-         response_message={"message": "Subscription has been deleted"}
-      else:
-         response_message = {"message": "Delete request not allowed"}
-      return Response(response_message)
+   # def destroy(self, request, *args, **kwargs):
+   #    subscription = self.get_object()
+   #    logged_user = request.user
+   #    if (logged_user == subscription.subscriber.identity):
+   #       subscription.delete()
+   #       response_message={"message": "Subscription has been deleted"}
+   #    else:
+   #       response_message = {"message": "Delete request not allowed"}
+   #    return Response(response_message)
 
 
 class VideoViewset(viewsets.ModelViewSet):
    # parser_classes = [JSONParser, FileUploadParser, MultiPartParser, FormParser,]
    queryset = Video.objects.all()
    serializer_class = VideoSerializer
-   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
    # def create(self, request, *args, **kwargs):
    #    author_data = Author.objects.get(id=request.data['author'])
@@ -176,8 +180,11 @@ class VideoViewset(viewsets.ModelViewSet):
 
    def get_queryset(self):
       queryset = Video.objects.all()
+      subscriber_id = self.request.query_params.get('subscriber_id', None)
       query = self.request.query_params.get('query', None)
       author_id = self.request.query_params.get('author_id', None)
+      if subscriber_id is not None:
+         queryset = search_video_by_subscription(subscriber_id)
       if query is not None:
          queryset = search_video(query)
       if author_id is not None:
@@ -197,21 +204,21 @@ class VideoViewset(viewsets.ModelViewSet):
          response_message = {"message": "Update request not allowed"}
          return Response(response_message)
 
-   def destroy(self, request, *args, **kwargs):
-      video = self.get_object()
-      logged_user = request.user
-      if (logged_user == video.author.identity):
-         video.delete()
-         response_message={"message": "Video has been deleted"}
-      else:
-         response_message = {"message": "Delete request not allowed"}
-      return Response(response_message)
+   # def destroy(self, request, *args, **kwargs):
+   #    video = self.get_object()
+   #    logged_user = request.user
+   #    if (logged_user == video.author.identity):
+   #       video.delete()
+   #       response_message={"message": "Video has been deleted"}
+   #    else:
+   #       response_message = {"message": "Delete request not allowed"}
+   #    return Response(response_message)
 
 
 class CommentViewset(viewsets.ModelViewSet):
    queryset = Comment.objects.all()
    serializer_class = CommentSerializer
-   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
    def get_queryset(self):
       queryset = Comment.objects.all()
@@ -236,41 +243,56 @@ class CommentViewset(viewsets.ModelViewSet):
          response_message = {"message": "Update request not allowed"}
          return Response(response_message)
 
-   def destroy(self, request, *args, **kwargs):
-      comment = self.get_object()
-      logged_user = request.user
-      if (logged_user == comment.author.identity):
-         comment.delete()
-         response_message={"message": "Comment has been deleted"}
-      else:
-         response_message = {"message": "Delete request not allowed"}
-      return Response(response_message)
+   # def destroy(self, request, *args, **kwargs):
+   #    comment = self.get_object()
+   #    logged_user = request.user
+   #    if (logged_user == comment.author.identity):
+   #       comment.delete()
+   #       response_message={"message": "Comment has been deleted"}
+   #    else:
+   #       response_message = {"message": "Delete request not allowed"}
+   #    return Response(response_message)
 
 
 class LikeViewset(viewsets.ModelViewSet):
    queryset = Like.objects.all()
    serializer_class = LikeSerializer
-   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
    def get_queryset(self):
       queryset = Like.objects.all()
       author_id = self.request.query_params.get('author_id', None)
       video_id = self.request.query_params.get('video_id', None)
-      if author_id is not None:
-         queryset = Like.objects.filter(author_id=author_id)
-      if video_id is not None:
+      if (author_id is not None) and (video_id is not None):
+         queryset = Like.objects.filter(author_id=author_id, video_id=video_id)
+      elif video_id is not None:
          queryset = Like.objects.filter(video_id=video_id)
+      elif author_id is not None:
+         queryset = Like.objects.filter(author_id=author_id)
       return queryset
 
    def update(self, request, *args, **kwargs):
       return Response({"message": "Update request not allowed"})
 
-   def destroy(self, request, *args, **kwargs):
-      like = self.get_object()
-      logged_user = request.user
-      if (logged_user == like.author.identity):
-         like.delete()
-         response_message={"message": "Like has been deleted"}
-      else:
-         response_message = {"message": "Delete request not allowed"}
-      return Response(response_message)
+   # def destroy(self, request, *args, **kwargs):
+   #    like = self.get_object()
+   #    logged_user = request.user
+   #    if (logged_user == like.author.identity):
+   #       like.delete()
+   #       response_message={"message": "Like has been deleted"}
+   #    else:
+   #       response_message = {"message": "Delete request not allowed"}
+   #    return Response(response_message)
+
+
+class CurrentViewset(viewsets.ModelViewSet):
+   authentication_classes = [BasicAuthentication]
+   permission_classes = [IsAuthenticated]
+   queryset = CustomUser.objects.all()
+   serializer_class = UserSerializer
+
+   def get_queryset(self):
+      queryset = CustomUser.objects.all()
+      user_id = self.request.user.id
+      queryset = CustomUser.objects.filter(id = user_id)
+      return queryset

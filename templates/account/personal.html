@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        {% load webpush_notifications %}
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="vapid-key" content="{{ vapid_key }}">
+        {% if user.id %}
+            <meta name="user_id" content="{{ user.id }}">
+        {% endif %}
+
+        <title>{% block title %}
+                Personal Page
+                {% endblock title %}
+        </title>
+        <link href="{% static 'css/personal.css' %}" rel="stylesheet" />
+    </head>
+
+    <body>
+    <header class='App-header'>
+        <a class='header_title' href='http://127.0.0.1:3000/'><h1>UTUBE</h1></a>
+        <svg class='header_button' width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 18v-12l9 6-9 6z"/></svg>
+        <script>
+            let menu_button = document.querySelector('.header_button');
+            function toggleMenu () {
+                let menu = document.querySelector('.header_menu');
+                menu.classList.toggle("hidden");
+            }
+            menu_button.addEventListener('click', toggleMenu);
+        </script>
+        <div class='header_menu hidden'>
+          <ul class='header_list'>
+            <li class='header_link'><a class='header_link_inner' href='http://127.0.0.1:3000/subscritpion/{{ user.id }}'>Recommended</a></li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/personal/'>Personal Page</a>
+            </li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/public/'>Public chats</a>
+            </li>
+          </ul>
+        </div>
+    </header>
+
+    <main class="main_container">
+<!--            SMS-verification form, commented out-->
+            <!--{% if not request.user.phone_verified %}-->
+            <!--<h1>Please confirm your phone number</h1>-->
+
+            <!--<br>-->
+            <!--<form method="POST" action="" enctype="multipart/form-data">-->
+            <!--	{% csrf_token %}-->
+            <!--	{{smsform.as_p}}-->
+            <!--    <input class="btn btn-primary" type="submit">-->
+            <!--</form>-->
+            <!--{% endif %}-->
+
+            {% if not request.user.phone_verified %}
+            <h1>Welcome to your personal page, {{request.user.username}}!</h1>
+
+            <div class="profilepic_container">
+                {% if request.user.author.profile_pic.url != '' %}
+                <img class="profile-pic" src="{{request.user.author.profile_pic.url}}" >
+                {% else %}
+                <p>Choose your profile picture!</p>
+                {% endif %}
+                 <a class="personal_logout_button" href="/accounts/logout/">Logout</a>
+            </div>
+
+            <p class="personal_update_header">Update your personal information here:</p>
+            <form class="personal_form" method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="personal_form_button" type="submit"> Update </button>
+            </form>
+
+            {% endif %}
+    </main>
+
+    </body>
+</html>

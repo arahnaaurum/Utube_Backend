@@ -49,7 +49,6 @@ class Comment(models.Model):
     text = models.TextField()
 
 
-
 class Like(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     time_creation = models.DateTimeField(auto_now_add=True)
