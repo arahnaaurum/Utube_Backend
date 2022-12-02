@@ -7,7 +7,7 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=200, blank=True, null=True)
     phone_verified = models.BooleanField(default=False, null=True)
 
-# чтобы не избежать путаницы с моделью User, стандартный пользователь будет обозначен как "автор"
+# чтобы избежать путаницы с моделью User, стандартный пользователь будет обозначен как "автор"
 class Author(models.Model):
     identity = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     is_banned = models.BooleanField(default=False)

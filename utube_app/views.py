@@ -1,27 +1,25 @@
-import os
-from twilio.rest import Client
-from django.http import HttpResponseRedirect
+# import os
+# from twilio.rest import Client
+# from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+# from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication
-
-from rest_framework.response import Response
-from rest_framework.decorators import parser_classes
-from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
+from rest_framework.permissions import IsAuthenticated, AllowAny
+# from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import parser_classes, api_view, permission_classes, authentication_classes
+# from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
 
 from .models import *
 from .serializers import *
 from .search import search_video, search_video_by_subscription
 from .forms import *
-from rest_framework.decorators import api_view
 
-from webpush import send_user_notification
 
 @login_required(login_url='/accounts/login/')
 def personalView(request):
@@ -109,7 +107,7 @@ class AuthorViewset(viewsets.ModelViewSet):
          self.perform_update(serializer)
          return Response(serializer.data)
       else:
-         response_message = {"message": "Delete request not allowed"}
+         response_message = {"message": "Update request not allowed"}
          return Response(response_message)
 
    def destroy(self, request, *args, **kwargs):
@@ -286,7 +284,8 @@ class LikeViewset(viewsets.ModelViewSet):
 
 
 class CurrentViewset(viewsets.ModelViewSet):
-   authentication_classes = [BasicAuthentication]
+   # authentication_classes = [BasicAuthentication]
+   authentication_classes = [SessionAuthentication]
    permission_classes = [IsAuthenticated]
    queryset = CustomUser.objects.all()
    serializer_class = UserSerializer
@@ -295,4 +294,22 @@ class CurrentViewset(viewsets.ModelViewSet):
       queryset = CustomUser.objects.all()
       user_id = self.request.user.id
       queryset = CustomUser.objects.filter(id = user_id)
+      print(queryset)
       return queryset
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_login(request):
+    data = request.data
+    serializer = LoginRequestSerializer(data=data)
+    if serializer.is_valid():
+        authenticated_user = authenticate(**serializer.validated_data)
+        print(authenticated_user)
+        if authenticated_user is not None:
+            login(request, authenticated_user)
+            return Response({'status': 'Success'})
+        else:
+            return Response({'error': 'Invalid credentials'}, status=403)
+    else:
+        return Response(serializer.errors, status=400)

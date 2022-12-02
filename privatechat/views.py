@@ -3,11 +3,10 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.parsers import JSONParser
 from django.contrib.auth.decorators import login_required
-from utube_app.models import *
 from .models import *
 from .serializers import *
 
-# User = get_user_model()
+User = get_user_model()
 
 
 def userlist(request):
@@ -15,8 +14,8 @@ def userlist(request):
 
 @login_required
 def privatechat(request, id):
-    # user_obj = User.objects.get(id=id)
-    user_obj = CustomUser.objects.get(id=id)
+    user_obj = User.objects.get(id=id)
+    # user_obj = CustomUser.objects.get(id=id)
     return render (request, 'privatechat.html', context = {'user':user_obj})
 
 

@@ -36,3 +36,10 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
        model = Like
        fields = ['id', 'author', 'time_creation', 'video']
+
+
+class LoginRequestSerializer(serializers.Serializer):
+    model = CustomUser
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+

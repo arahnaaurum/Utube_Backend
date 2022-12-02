@@ -4,8 +4,13 @@ from channels.db import database_sync_to_async
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        my_id = self.scope['user'].id
-        other_user_id = self.scope['url_route']['kwargs']['id']
+        # my_id = self.scope['user'].id
+        # other_user_id = self.scope['url_route']['kwargs']['id']
+        # print(my_id)
+        ids = (self.scope['url_route']['kwargs']['id']).split('_')
+        my_id = ids[0]
+        other_user_id = ids[1]
+        print(other_user_id)
         if int(my_id) > int(other_user_id):
             self.room_name = f'{my_id}-{other_user_id}'
         else:
