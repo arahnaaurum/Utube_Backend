@@ -4,7 +4,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -15,7 +14,6 @@ SECRET_KEY = 'django-insecure-td4&$6exvf9+(rlt+b8$gnh_1&jk5nrcq6x^8-#d*v_1=!t&1l
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -90,7 +88,6 @@ CHANNEL_LAYERS = {
 
 WSGI_APPLICATION = 'Utube.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -123,7 +120,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -134,7 +130,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -167,7 +162,7 @@ AUTH_USER_MODEL = 'utube_app.CustomUser'
 
 # настройки аутентификации
 AUTHENTICATION_BACKENDS = [
-     # Needed to login by username in Django admin, regardless of `allauth`
+    # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -177,7 +172,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none' #'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory'
 ACCOUNT_FORMS = {'signup': 'utube_app.forms.MyCustomSocialSignupForm'}
 ACCOUNT_SIGNUP_REDIRECT_URL = "/"
 
@@ -188,12 +183,22 @@ LOGOUT_URL = '/accounts/logout/'
 LOGOUT_REDIRECT_URL = 'http://127.0.0.1:3000/'
 
 REST_FRAMEWORK = {
-   'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-   'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-   'PAGE_SIZE': 100,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+    'PAGE_SIZE': 100,
 }
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_COOKIE_HTTPONLY = False
+SESSION_SAVE_EVERY_REQUEST = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_HEADERS = ['*']
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOW_CREDENTIALS = True
 
@@ -212,7 +217,7 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 WEBPUSH_SETTINGS = {
-   "VAPID_PUBLIC_KEY": "BJ3BrV957SOpjhBRm1grKqWkmy_-eJs7SBjMbWIqy9bjv4BjcvP8bWSeNNia3agoZMbYpAFHHTUTwAzn7gxl2ls",
-   "VAPID_PRIVATE_KEY": "tpZFc7aPJ8hrbh_h0S_fI_VZB7loEfiW9WCs0MoTAeU",
-   "VAPID_ADMIN_EMAIL": "arahna.aurum@yandex.ru"
+    "VAPID_PUBLIC_KEY": "BJ3BrV957SOpjhBRm1grKqWkmy_-eJs7SBjMbWIqy9bjv4BjcvP8bWSeNNia3agoZMbYpAFHHTUTwAzn7gxl2ls",
+    "VAPID_PRIVATE_KEY": "tpZFc7aPJ8hrbh_h0S_fI_VZB7loEfiW9WCs0MoTAeU",
+    "VAPID_ADMIN_EMAIL": "arahna.aurum@yandex.ru"
 }
