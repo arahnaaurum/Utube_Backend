@@ -4,8 +4,8 @@ from .models import *
 
 class CustomUserAdmin(UserAdmin):
     list_display = (
-        'username', 'email', 'first_name', 'last_name', 'is_staff',
-        'phone'
+        'id', 'username', 'email', 'first_name', 'last_name', 'is_staff',
+        'phone', 'phone_verified'
         )
 
     fieldsets = (
@@ -45,7 +45,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ['id', 'identity', 'is_banned']
+    list_display = ['id', 'identity', 'is_banned', 'profile_pic']
 
 class VideoAdmin(admin.ModelAdmin):
     list_display = ['id', 'author', 'time_creation', 'title', 'description', 'hashtags', 'file']

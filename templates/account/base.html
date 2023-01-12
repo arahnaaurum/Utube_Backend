@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% load static %}
+         <meta name="vapid-key" content="{{ vapid_key }}">
+        {% if user.id %}
+            <meta name="user_id" content="{{ user.id }}">
+        {% endif %}
         <title>
-            {% load cache%}
-            {% cache 30 head_title %}
-                {% block head_title %}
-                {% endblock head_title %}
-            {% endcache %}
+            {% block head_title %}
+            {% endblock head_title %}
         </title>
+        <link href="{% static 'css/personal.css' %}" rel="stylesheet" />
     </head>
+        <header class='App-header'>
+        <a class='header_title' href='http://127.0.0.1:3000/'><h1>UTUBE</h1></a>
+        <svg class='header_button' width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 18v-12l9 6-9 6z"/></svg>
+        <script>
+            let menu_button = document.querySelector('.header_button');
+            function toggleMenu () {
+                let menu = document.querySelector('.header_menu');
+                menu.classList.toggle("hidden");
+            }
+            menu_button.addEventListener('click', toggleMenu);
+        </script>
+        <div class='header_menu hidden'>
+          <ul class='header_list'>
+            <li class='header_link'><a class='header_link_inner' href='http://127.0.0.1:3000/subscritpion/{{ user.id }}'>Recommended</a></li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/personal/'>Personal Page</a>
+            </li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/public/'>Public chats</a>
+            </li>
+          </ul>
+        </div>
+    </header>
     <body>
         {% block body %}
         {% block content %}

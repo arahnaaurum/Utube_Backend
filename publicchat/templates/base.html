@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+            {% block head_title %}
+            {% endblock head_title %}
+    </title>
+    {% load static %}
+    <style>
+        body {
+            background-color: rgb(247, 237, 196);
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .App-header {
+          width: 100%;
+          height:100px;
+          margin-bottom: 30px;
+          background-color: darkcyan;
+          display: flex;
+          justify-content: space-between;
+          padding: 0px 50px;
+          align-items: center;
+          box-sizing: border-box;
+          position: relative;
+        }
+
+        .hidden {
+          display: none;
+        }
+
+        .header_title {
+          text-decoration: none;
+          color: white;
+        }
+
+        .header_button {
+          fill: lightcyan;
+          transition: 0.3s;
+        }
+
+        .header_button:hover {
+          fill: cornflowerblue;
+          transform: scale(1.5);
+        }
+
+        .header_menu {
+          border-radius: 20px;
+          border: darkcyan 1px solid;
+          box-sizing: content-box;
+          padding: 40px 36px;
+          position: absolute;
+          top: 100px;
+          right: 0;
+          background-color: lightcyan;
+        }
+
+        .header_list {
+          padding: 0;
+          list-style-type: none;
+        }
+
+        .header_link {
+          font-size: 20px;
+          transition: 0.3s;
+          margin-bottom: 24px;
+        }
+
+        .header_link:hover {
+          transform: scale(1.2)
+         }
+
+        .header_link_inner {
+          text-decoration: none;
+          color: darkcyan;
+        }
+
+        .header_link_inner:hover {
+         color: cornflowerblue;
+        }
+
+        .main_container {
+            max-width: 1000px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .direct_container {
+            width: 500px;
+            margin: auto;
+            display: flex;
+            justify-content: space-around;
+        }
+        .direct_btn {
+            border: none;
+            border-radius: 10px;
+            background-color: darkcyan;
+            font-size: 30px;
+            padding: 15px;
+            color: white;
+            margin-bottom: 10px;
+            text-decoration: none;
+        }
+        
+        .direct_btn:hover {
+            background-color: cornflowerblue;
+        }
+        
+        .direct_title {
+            text-align: center;
+            color: rgb(1, 96, 96);
+            margin-bottom: 20px;
+        }
+        .direct_title_main {
+            font-size: 64px;
+        }
+        
+        #btn_chats {
+            border: none;
+            border-radius: 10px;
+            background-color: darkcyan;
+            font-size: 20px;
+            padding: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        #btn_chats:hover {
+            background-color:cornflowerblue;
+        }
+
+        #btn_toggle {
+            border: none;
+            border-radius: 10px;
+            background-color: rgb(170, 215, 125);
+            font-size: 15px;
+            padding: 10px;
+            color: white;
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        #chatlist_container {
+            width: 450px;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgb(109, 192, 192);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .chat_info {
+            font-size: 30px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .chat_link {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .chat_link:hover {
+           color:cornflowerblue;
+        }
+        
+        .btn_chat {
+            border: none;
+            border-radius: 10px;
+            background-color: darkcyan;
+            font-size: 15px;
+            padding: 10px;
+            color: white;
+        }
+
+        .btn_chat:hover {
+            background-color:cornflowerblue;
+        }
+
+        #chatName, .msginput {
+            border: none;
+            border-radius: 10px;
+            background-color: white;
+            font-size: 20px;
+            padding: 10px;
+            color: darkcyan;
+            margin-bottom: 10px;
+            border:rgb(1, 96, 96) solid 2px;
+        }
+        .chattitle {
+            font-size: 30px;
+            padding: 10px;
+            margin-bottom: 10px;
+            color:rgb(1, 70, 70);
+        }
+        .msgblock {
+            width: 850px;
+            min-height: 100px;
+            font-size: 20px;
+            padding: 10px;
+            color: rgb(1, 70, 70);
+            background-color: white;
+            margin-bottom: 10px;
+            border:rgb(1, 96, 96) solid 2px;
+            border-radius: 10px;
+        }
+        .rename{
+            color: darkcyan;
+        }
+
+        #btn_users {
+            border: none;
+            border-radius: 10px;
+            background-color: darkcyan;
+            font-size: 20px;
+            padding: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        #btn_users:hover {
+            background-color:cornflowerblue;
+        }
+
+        .total_container {
+            max-width: 860px;
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-start;
+        }
+               
+        .textarea {
+            min-height: 600px;
+            width: 600px;
+            color:rgb(1, 70, 70);
+            font-size: 20px;
+            border: 3px solid rgb(109, 192, 192);
+            border-radius: 20px;
+            background-color: white;
+            padding: 20px;
+        }
+
+        .userlist_container {
+            width: 350px;
+            margin: auto;
+        }
+
+        .user_info {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .profile-pic {
+            padding: 10px;
+        }
+
+        .username {
+            text-decoration: none;
+            color: rgb(1, 70, 70);
+            font-size: 20px;
+        }
+
+        .chat_greet {
+            color: rgb(1, 70, 70);
+        }
+</style>       
+
+</head>
+<body>
+  {% block body %}
+    <header class="App-header">
+        <a class='header_title' href='http://127.0.0.1:3000/'><h1>UTUBE</h1></a>
+        <svg class='header_button' width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 18v-12l9 6-9 6z"/></svg>
+        <script>
+            let menu_button = document.querySelector('.header_button');
+            function toggleMenu () {
+                let menu = document.querySelector('.header_menu');
+                menu.classList.toggle("hidden");
+            }
+            menu_button.addEventListener('click', toggleMenu);
+        </script>
+        <div class='header_menu hidden'>
+          <ul class='header_list'>
+            <li class='header_link'><a class='header_link_inner' href='http://127.0.0.1:3000/subscritpion/{{ user.id }}'>Recommended</a></li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/personal/'>Personal Page</a>
+            </li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/public/'>Public chats</a>
+            </li>
+          </ul>
+        </div>
+    </header>
+    {% block content %}
+    {% endblock content %}
+
+  {% endblock body %}
+</body>
+</html>

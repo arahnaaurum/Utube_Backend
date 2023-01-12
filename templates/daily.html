@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Update on Unread Messages</title>
+</head>
+<body>
+    <h1>Dear {{ username }}!</h1>
+    <p>You have the following unread messages for the past 7 days:</p>
+        {% for msg in msg_list %}
+        <h3>{{ msg.time_creation|date:"d M Y" }}</h3>
+        <h2>{{ msg.text }}</h2>
+        {% endfor %}
+</body>
+</html>

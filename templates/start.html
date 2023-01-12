@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="vapid-key" content="{{ vapid_key }}">
+    {% if user.id %}
+        <meta name="user_id" content="{{ user.id }}">
+    {% endif %}
+    <title>Start Page</title>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet">
+    <link href="{% static 'css/start.css' %}" rel="stylesheet" />
+</head>
+
+<body>
+    <header class="App-header">
+        <a class='header_title' href='http://127.0.0.1:3000/'><h1>UTUBE</h1></a>
+        <svg class='header_button' width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 18v-12l9 6-9 6z"/></svg>
+        <script>
+            let menu_button = document.querySelector('.header_button');
+            function toggleMenu () {
+                let menu = document.querySelector('.header_menu');
+                menu.classList.toggle("hidden");
+            }
+            menu_button.addEventListener('click', toggleMenu);
+        </script>
+        <div class='header_menu hidden'>
+          <ul class='header_list'>
+            <li class='header_link'><a class='header_link_inner' href='http://127.0.0.1:3000/subscritpion/{{ user.id }}'>Recommended</a></li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/personal/'>Personal Page</a>
+            </li>
+            <li class='header_link'>
+              <a class='header_link_inner' href='http://127.0.0.1:8000/public/'>Public chats</a>
+            </li>
+          </ul>
+        </div>
+    </header>
+
+    <main class="main_container">
+
+        <div class="start_greeting">
+            <h2 class="start_greeting_header">
+                Dear {{request.user.username}}!
+            </h2>
+            <p class="start_greeting_text cursive">
+                Welcome to Utube - a place where all the best videos are hosted.
+            </p>
+            <p class="start_greeting_text">
+                Now you may:
+            </p>
+            <ul>
+                <li class="start_greeting_text">
+                    Return to watching videos.
+                </li>
+                <li class="start_greeting_text">
+                    Visit your personal page and become our author: then you will be able to load your own videos, subscribe to other authors and talk to them in private chats.
+                </li>
+                <li class="start_greeting_text">
+                   Subscribe to push notifications and send a greeting message to other users.
+                </li>
+            </ul>
+        </div>
+
+        <form id="send-push__form">
+            <p class="start_pushform_header">Send a greeting</p>
+            <p class="error"></p>
+            <input class="start_pushform_head" type="text" name="head" placeholder="Header goes here">
+            <textarea class="start_pushform_body" name="body" id="" cols="30" rows="10" placeholder="Body goes here"></textarea>
+            <button class="start_pushform_button">Send Me</button>
+        </form>
+    </main>
+
+    <script src="{% static '/js/registerSw.js' %}"></script>
+    <script src="{% static '/js/site.js' %}"></script>
+
+</body>
+</html>

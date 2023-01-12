@@ -14,12 +14,13 @@ SECRET_KEY = 'django-insecure-td4&$6exvf9+(rlt+b8$gnh_1&jk5nrcq6x^8-#d*v_1=!t&1l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,18 +31,28 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'fpages',
-    'utube_app',
+    'utube_app.apps.UtubeAppConfig',
+    'django_apscheduler',
+    'webpush',
+
+    # Websocket чаты
+    'publicchat',
+    'privatechat.apps.PrivatechatConfig',
+
     # настройки allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
+
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,10 +74,19 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
 ]
+
+ASGI_APPLICATION = 'Utube.routing.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 WSGI_APPLICATION = 'Utube.wsgi.application'
 
@@ -139,7 +159,7 @@ DEFAULT_FROM_EMAIL = 'arahna.aurum@yandex.ru'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'arahna.aurum'
-EMAIL_HOST_PASSWORD = '******'
+EMAIL_HOST_PASSWORD = '***'
 EMAIL_USE_SSL = True
 
 # кастомизированный юзер
@@ -159,9 +179,40 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none' #'mandatory'
 ACCOUNT_FORMS = {'signup': 'utube_app.forms.MyCustomSocialSignupForm'}
+ACCOUNT_SIGNUP_REDIRECT_URL = "/"
 
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/home/personal'
+LOGIN_REDIRECT_URL = '/personal'
 
 LOGOUT_URL = '/accounts/logout/'
-LOGOUT_REDIRECT_URL = '/home'
+LOGOUT_REDIRECT_URL = 'http://127.0.0.1:3000/'
+
+REST_FRAMEWORK = {
+   'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+   'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+   'PAGE_SIZE': 100,
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:8000',
+    'http://localhost:3000',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://localhost:3000',
+]
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+# если задача не выполняется за 25 секунд, то она автоматически снимается
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
+WEBPUSH_SETTINGS = {
+   "VAPID_PUBLIC_KEY": "BJ3BrV957SOpjhBRm1grKqWkmy_-eJs7SBjMbWIqy9bjv4BjcvP8bWSeNNia3agoZMbYpAFHHTUTwAzn7gxl2ls",
+   "VAPID_PRIVATE_KEY": "tpZFc7aPJ8hrbh_h0S_fI_VZB7loEfiW9WCs0MoTAeU",
+   "VAPID_ADMIN_EMAIL": "arahna.aurum@yandex.ru"
+}

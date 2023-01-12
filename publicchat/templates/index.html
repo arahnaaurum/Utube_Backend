@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Starting page
+{% endblock head_title %}
+
+{% block content %}
+    <main>
+        <div class="main_container">
+            <button id="btn_chats">SHOW ALL CHATS</button>
+            <div id="chatlist_container"></div>
+            <button id="btn_toggle">Hide/show chatlist</button>
+            <br>
+            <input type="text" value="Enter chat name" id="chatName"></input>
+            <button class="btn_chat" id="btn_create">CREATE NEW CHAT</button>
+        </div>
+    </main>
+
+
+    <script>
+            const container = document.querySelector('#chatlist_container');
+            const btn = document.querySelector('#btn_chats');
+            const toggle = document.querySelector('#btn_toggle');
+            const createbtn = document.querySelector('#btn_create');
+
+
+            async function getChatList(url) {
+               let response = await fetch(url);
+               if (response.ok) {
+                    let result = await response.json();
+                    return result
+               } else {
+                    alert("Ошибка HTTP: " + response.status);
+               }
+            };
+
+            
+            async function deleteChat(url) {
+                await fetch(url, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFTOKEN": "{{csrf_token}}"
+                    }
+                }).then(console.log('Chat is deleted!'))
+            };
+
+
+            btn.addEventListener('click', async () => {
+                const reqResult = await getChatList('http://127.0.0.1:8000/public/api/chatlist/');
+                console.log('reqResult', reqResult);
+
+                reqResult['results'].forEach(element => {
+                    let name = element.name
+                    container.innerHTML += `<div class="chat_info">
+                        <div><a class="chat_link" href="http://127.0.0.1:8000/public/${name}">${name}</a></div>
+                        <button id="delete${name}" class="btn_chat">DELETE</button>
+                    </div>`
+                    });
+                
+                reqResult['results'].forEach(element => {
+                    let name = element.name
+                    let chatURL = 'http://127.0.0.1:8000/public/api/chatlist/' + name + '/'
+                    document.querySelector(`#delete${name}`).addEventListener('click', async () => {
+                        await deleteChat(chatURL);
+                    });
+                });
+                
+                   
+                toggle.style.display = "block";
+
+            });
+
+            toggle.addEventListener('click', () => {
+                if (container.style.display === "none") {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            });
+
+          async function createNewChat(url, name) {
+                console.log(name)
+                await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFTOKEN": "{{csrf_token}}"
+                    },
+                    body: JSON.stringify({name : name})
+                })
+            };
+
+            createbtn.addEventListener('click', () => {
+                let chatName = document.getElementById("chatName").value;
+                createNewChat('http://127.0.0.1:8000/public/api/chatlist/', chatName);
+                console.log (chatName + " created!")
+            });
+
+    </script>
+{% endblock content %}
