@@ -30,10 +30,7 @@ class Video(models.Model):
     description = models.TextField(null=True)
     file = models.FileField()
 
-    # хэштеги будут храниться в массиве, а не отдельным классом
-    # def default_hashtags():
-    #     return 'movies, videos'.split(', ')
-    #
+    # при использовании PostgreSQL хэштеги можно также хранить в массиве, а не создавать отдельный класс/таблицу:
     # hashtags = ArrayField(models.CharField(max_length=20, blank=True), size=10, default= default_hashtags)
 
     hashtags = models.CharField(max_length=255, blank=True, null=True)
