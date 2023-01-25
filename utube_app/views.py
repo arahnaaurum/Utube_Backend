@@ -12,7 +12,6 @@ from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import parser_classes, api_view, permission_classes, authentication_classes
-# from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
 
 from .models import *
 from .serializers import *
@@ -23,6 +22,7 @@ from .forms import *
 @login_required(login_url='/accounts/login/')
 def personalView(request):
    sms_form = SMSForm()
+   # ниже реализована проверка номера телефона пользователя по SMS-коду (через сервис Twilio):
    # if request.method == 'POST':
    #    sms_form = SMSForm(request.POST)
       # if sms_form.is_valid():
@@ -66,7 +66,6 @@ def personalView(request):
    return render(request, 'account/personal.html', context)
 
 
-# информация о юзерах доступна только админу
 class UserViewset(viewsets.ModelViewSet):
    queryset = CustomUser.objects.all()
    serializer_class = UserSerializer
@@ -123,7 +122,6 @@ class AuthorViewset(viewsets.ModelViewSet):
 class SubscriptionViewset(viewsets.ModelViewSet):
    queryset = Subscription.objects.all()
    serializer_class = SubscriptionSerializer
-   # permission_classes = [permissions.IsAuthenticated]
 
    def get_queryset(self):
       queryset = Subscription.objects.all()
@@ -139,6 +137,7 @@ class SubscriptionViewset(viewsets.ModelViewSet):
    def update(self, request, *args, **kwargs):
       return Response({"message": "Update request not allowed"})
 
+   # после подключения фронтэнда проверка того, что пользователь удаляет именно свою подписку, перенесена на фронтэнд
    # def destroy(self, request, *args, **kwargs):
    #    subscription = self.get_object()
    #    logged_user = request.user
@@ -151,29 +150,8 @@ class SubscriptionViewset(viewsets.ModelViewSet):
 
 
 class VideoViewset(viewsets.ModelViewSet):
-   # parser_classes = [JSONParser, FileUploadParser, MultiPartParser, FormParser,]
    queryset = Video.objects.all()
    serializer_class = VideoSerializer
-   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-   # def create(self, request, *args, **kwargs):
-   #    author_data = Author.objects.get(id=request.data['author'])
-   #    title_data = request.data['title']
-   #    description_data = request.data['description']
-   #    hashtags_data = request.data['hashtags']
-   #    video_obj = request.data['file']
-   #
-   #    new_video = Video.objects.create(author=author_data,
-   #                                     title=title_data,
-   #                                     description=description_data,
-   #                                     file=video_obj,
-   #                                     hashtags=hashtags_data)
-   #    new_video.save()
-   #    serializer_context = {
-   #       'request': request,
-   #    }
-   #    serializer = VideoSerializer(new_video, context=serializer_context)
-   #    return Response(serializer.data)
 
    def get_queryset(self):
       queryset = Video.objects.all()
@@ -201,6 +179,7 @@ class VideoViewset(viewsets.ModelViewSet):
          response_message = {"message": "Update request not allowed"}
          return Response(response_message)
 
+   # после подключения фронтэнда проверка того, что пользователь удаляет именно свое видео, перенесена на фронтэнд
    # def destroy(self, request, *args, **kwargs):
    #    video = self.get_object()
    #    logged_user = request.user
@@ -215,7 +194,6 @@ class VideoViewset(viewsets.ModelViewSet):
 class CommentViewset(viewsets.ModelViewSet):
    queryset = Comment.objects.all()
    serializer_class = CommentSerializer
-   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
    def get_queryset(self):
       queryset = Comment.objects.all()
@@ -240,6 +218,7 @@ class CommentViewset(viewsets.ModelViewSet):
          response_message = {"message": "Update request not allowed"}
          return Response(response_message)
 
+   # после подключения фронтэнда проверка того, что пользователь удаляет именно свой коммент, перенесена на фронтэнд
    # def destroy(self, request, *args, **kwargs):
    #    comment = self.get_object()
    #    logged_user = request.user
@@ -254,7 +233,6 @@ class CommentViewset(viewsets.ModelViewSet):
 class LikeViewset(viewsets.ModelViewSet):
    queryset = Like.objects.all()
    serializer_class = LikeSerializer
-   # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
    def get_queryset(self):
       queryset = Like.objects.all()
@@ -271,6 +249,7 @@ class LikeViewset(viewsets.ModelViewSet):
    def update(self, request, *args, **kwargs):
       return Response({"message": "Update request not allowed"})
 
+   # после подключения фронтэнда проверка того, что пользователь удаляет именно свой лайк, перенесена на фронтэнд
    # def destroy(self, request, *args, **kwargs):
    #    like = self.get_object()
    #    logged_user = request.user
